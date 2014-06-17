@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <arpa/inet.h>
-#define N 1024
+#define N 1
 int main(int argc, char** argv)
 {
     if(argc != 2){
@@ -32,11 +32,17 @@ int main(int argc, char** argv)
 
     printf("%s\n",inet_ntoa(addr.sin_addr));
 
+    /* int fd; */
+    /* if((fd = open("/dev/dsp",O_RDONLY)) < 0){ */
+    /*     perror("open"); */
+    /*     return -1; */
+    /* } */
+    
     while(1){
         for(i = 0;i < N;i++)
             buf[i] = getchar();
         // パケットをUDPで送信
-        if(sendto(sd, "I am send process", sizeof(char)*N, 0,
+        if(sendto(sd, buf, sizeof(char)*N, 0,
                   (struct sockaddr *)&addr, sizeof(addr)) < 0) {
             perror("sendto");
             return -1;

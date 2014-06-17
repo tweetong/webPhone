@@ -12,7 +12,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#define N 1024
+#define N 1
 int main(int argc, char** argv)
 {
     int sd;
@@ -58,7 +58,7 @@ int main(int argc, char** argv)
             perror("recvfrom");
             return -1;
         }
-        if(write(fd,buf,N) < 0){
+        if(write(fd,buf,i) < 0){
             perror("write");
             return -1;
         }
@@ -71,7 +71,7 @@ int main(int argc, char** argv)
 
     // ソケットのクローズ
     close(sd);
-
+    close(fd);
     // 受信データの出力
 
     return 0;
