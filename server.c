@@ -66,7 +66,7 @@ int main(int argc, char** argv)
             perror("read");
             return -1;
         }
-        printf("%s\n",inet_ntoa(addr.sin_addr));
+        printf("%s\n",inet_ntoa(from_addr.sin_addr));
         if(sendto(sd, buf, sizeof(buf)*N, 0,
                   (struct sockaddr *)&from_addr, sizeof(from_addr)) < 0) {
             perror("sendto");

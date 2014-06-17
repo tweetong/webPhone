@@ -41,10 +41,10 @@ int main(int argc, char** argv)
     printf("%s\n",inet_ntoa(addr.sin_addr));
 
     int fd;
-    if((fd = open("/dev/dsp",O_RDWR)) < 0){
-        perror("open");
-        return -1;
-    }
+    /* if((fd = open("/dev/dsp",O_RDWR)) < 0){ */
+    /*     perror("open"); */
+    /*     return -1; */
+    /* } */
     
     while(1){
         read(fd,buf,sizeof(char)*N);
