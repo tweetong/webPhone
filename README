@@ -2,3 +2,15 @@
 
 *途切れないようにthreadをたてる by tweetong
 *FFTの実装 by tokineruE
+
+makeの仕様
+make serverでサーバーのプログラムを構成
+make clientでクライアントのプログラムを構成
+
+gitでよく使うもの
+git commit -am "comment" 変更をgitに繁栄する
+git pull 他の人の変更を持ってくる
+git branch new_branch ブランチを作る
+git checkout branch_name ブランチに移動する(現在いるブランチの作業をcommitした後でないといけない
+git merge branch_name 今いるブランチにbranch_nameをくっつける
+git pushリポジトリに自分の変更を上げて共有する
