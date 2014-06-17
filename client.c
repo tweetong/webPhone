@@ -9,17 +9,19 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 
-#define N 100
+#include "util/die.h"
+#include "util/params.h"
+
 int main(int argc, char** argv)
 {
     if(argc != 2){
         printf("argument\n");
-        return -1;
+        exit(1);
     }
+    
     int sd;
     struct sockaddr_in addr;
     struct sockaddr_in from_addr;
@@ -27,10 +29,7 @@ int main(int argc, char** argv)
     int i;
     socklen_t sin_size = sizeof(struct sockaddr_in);
 
-    if((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        perror("socket");
-        return -1;
-    }
+    if((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) die("socket");
 
     // 送信先アドレスとポート番号を設定する
     // 受信プログラムと異なるあて先を設定しても UDP の場合はエラーにはならない
@@ -38,33 +37,23 @@ int main(int argc, char** argv)
     addr.sin_port = htons(50000);
     addr.sin_addr.s_addr = inet_addr(argv[1]);
 
-    printf("%s\n",inet_ntoa(addr.sin_addr));
+    //printf("%s\n",inet_ntoa(addr.sin_addr));
 
     int fd;
-    if((fd = open("/dev/dsp",O_RDWR)) < 0){
-        perror("open");
-        return -1;
+    if((fd = open("/dev/dsp",O_RDWR)) < 0) die("open");
+
+    while(1){
+        if((read(fd,buf,sizeof(char)*N)) < 0) die("read");
+        // パケットをUDPで送信
+        if(sendto(sd, buf, sizeof(char)*N, 0, (struct sockaddr *)&addr, sizeof(addr)) < 0) die("sendto");
+
+        if((i = recvfrom(sd, buf, sizeof(buf), 0, (struct sockaddr *)&from_addr, &sin_size)) < 0) die("recvfrom");
+
+        if((write(fd,buf,i)) < 0) die("write");
     }
     
-    while(1){
-        read(fd,buf,sizeof(char)*N);
-        // パケットをUDPで送信
-        printf("sendto\n");
-        if(sendto(sd, buf, sizeof(char)*N, 0,
-                  (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-            perror("sendto");
-            return -1;
-        }
-        printf("recvfrom\n");
-        if((i = recvfrom(sd, buf, sizeof(buf), 0,
-                         (struct sockaddr *)&from_addr, &sin_size)) < 0) {
-            perror("recvfrom");
-            return -1;
-        }
-        write(fd,buf,i);
-    }
     close(sd);
-
+    close(fd);
 
     return 0;
 }

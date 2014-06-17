@@ -9,10 +9,12 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-
 #include <stdio.h>
 #include <stdlib.h>
-#define N 100
+
+#include "util/die.h"
+#include "util/params.h"
+
 int main(int argc, char** argv)
 {
     int sd;
@@ -24,10 +26,7 @@ int main(int argc, char** argv)
     char buf[N]; // 受信バッファ
     int i;
     // IPv4 UDP のソケットを作成
-    if((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        perror("socket");
-        return -1;
-    }
+    if((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) die("socket");
 
     // 待ち受けるIPとポート番号を設定
     addr.sin_family = AF_INET;
@@ -35,49 +34,32 @@ int main(int argc, char** argv)
     addr.sin_addr.s_addr = INADDR_ANY; // すべてのアドレス宛のパケットを受信する
 
     // バインドする
-    if(bind(sd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-        perror("bind");
-        return -1;
-    }
+    if(bind(sd, (struct sockaddr *)&addr, sizeof(addr)) < 0) die("bind");
 
     // 受信バッファの初期化
     memset(buf, 0, sizeof(buf));
 
     int fd;
-    if((fd = open("/dev/dsp",O_RDWR,0644)) < 0){
-        perror("open");
-        return -1;
-    }
+    if((fd = open("/dev/dsp",O_RDWR,0644)) < 0) die("open");
 
     while(1){
         
         // 受信 パケットが到着するまでブロック
         // from_addr には、送信元アドレスが格納される
-        if((i = recvfrom(sd, buf, sizeof(buf), 0,
-                         (struct sockaddr *)&from_addr, &sin_size)) < 0) {
-            perror("recvfrom");
-            return -1;
-        }
-        if(write(fd,buf,i) < 0){
-            perror("write");
-            return -1;
-        }
-        if(read(fd,buf,N) < 0){
-            perror("read");
-            return -1;
-        }
-        printf("%s\n",inet_ntoa(from_addr.sin_addr));
-        if(sendto(sd, buf, sizeof(char)*N, 0,
-                  (struct sockaddr *)&from_addr, sizeof(from_addr)) < 0) {
-            perror("sendto");
-            return -1;
-        }
+        if((i = recvfrom(sd, buf, sizeof(buf), 0, (struct sockaddr *)&from_addr, &sin_size)) < 0)
+            die("recvfrom");
+
+        if(write(fd,buf,i) < 0) die("write");
+
+        if(read(fd,buf,N) < 0) die("read");
+
+//        printf("%s\n",inet_ntoa(from_addr.sin_addr));
+        if(sendto(sd, buf, sizeof(char)*N, 0, (struct sockaddr *)&from_addr, sizeof(from_addr)) < 0) die("sendto");
     }
 
     // ソケットのクローズ
     close(sd);
     close(fd);
-    // 受信データの出力
 
     return 0;
 }
