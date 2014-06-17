@@ -1,2 +1,4 @@
 ついーとんとときねるのウェブフォーン仕様
-test
+
+*途切れないようにthreadをたてる by tweetong
+*FFTの実装 by tokineruE
