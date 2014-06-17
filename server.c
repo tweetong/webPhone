@@ -53,6 +53,7 @@ int main(int argc, char** argv)
         
         // 受信 パケットが到着するまでブロック
         // from_addr には、送信元アドレスが格納される
+      printf("recvfrom\n");
         if((i = recvfrom(sd, buf, sizeof(buf), 0,
                          (struct sockaddr *)&from_addr, &sin_size)) < 0) {
             perror("recvfrom");
@@ -67,8 +68,7 @@ int main(int argc, char** argv)
             return -1;
         }
         printf("%s\n",inet_ntoa(from_addr.sin_addr));
-        if(sendto(sd, buf, sizeof(buf)*N, 0,
-                  (struct sockaddr *)&from_addr, sizeof(from_addr)) < 0) {
+        if(sendto(sd, buf, sizeof(char)*N, 0, (struct sockaddr *)&from_addr, sizeof(from_addr)) < 0) {
             perror("sendto");
             return -1;
         }
