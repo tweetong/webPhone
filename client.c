@@ -41,7 +41,7 @@ int main(int argc, char** argv)
     printf("%s\n",inet_ntoa(addr.sin_addr));
 
     int fd;
-    if((fd = open("/dev/dsp",O_WRONLY|O_CREAT|O_TRUNC|O_RDONLY)) < 0){
+    if((fd = open("/dev/dsp",O_RDWR)) < 0){
         perror("open");
         return -1;
     }

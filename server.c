@@ -44,7 +44,7 @@ int main(int argc, char** argv)
     memset(buf, 0, sizeof(buf));
 
     int fd;
-    if((fd = open("/dev/dsp",O_WRONLY|O_CREAT|O_TRUNC|O_RDONLY,0644)) < 0){
+    if((fd = open("/dev/dsp",O_RDWR,0644)) < 0){
         perror("open");
         return -1;
     }
