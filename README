@@ -6,6 +6,7 @@
 makeの仕様
 make serverでサーバーのプログラムを構成
 make clientでクライアントのプログラムを構成
+!新たに作ったファイルについてはそれを使うseverかclientのOBJSに書き加える
 
 gitでよく使うもの
 git commit -am "comment" 変更をgitに繁栄する
