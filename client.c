@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <arpa/inet.h>
-#define N 1
+#define N 100
 int main(int argc, char** argv)
 {
     if(argc != 2){

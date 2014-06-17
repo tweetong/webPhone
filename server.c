@@ -12,7 +12,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#define N 1
+#define N 100
 int main(int argc, char** argv)
 {
     int sd;
