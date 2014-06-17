@@ -41,20 +41,21 @@ int main(int argc, char** argv)
     printf("%s\n",inet_ntoa(addr.sin_addr));
 
     int fd;
-    /* if((fd = open("/dev/dsp",O_RDWR)) < 0){ */
-    /*     perror("open"); */
-    /*     return -1; */
-    /* } */
+    if((fd = open("/dev/dsp",O_RDWR)) < 0){
+        perror("open");
+        return -1;
+    }
     
     while(1){
         read(fd,buf,sizeof(char)*N);
         // パケットをUDPで送信
+        printf("sendto\n");
         if(sendto(sd, buf, sizeof(char)*N, 0,
                   (struct sockaddr *)&addr, sizeof(addr)) < 0) {
             perror("sendto");
             return -1;
         }
-        
+        printf("recvfrom\n");
         if((i = recvfrom(sd, buf, sizeof(buf), 0,
                          (struct sockaddr *)&from_addr, &sin_size)) < 0) {
             perror("recvfrom");
