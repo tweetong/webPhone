@@ -5,6 +5,14 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#define N 1024
 int main(int argc, char** argv)
 {
     int sd;
@@ -13,8 +21,8 @@ int main(int argc, char** argv)
     socklen_t sin_size = sizeof(struct sockaddr_in);
     struct sockaddr_in from_addr;
 
-    char buf[2048]; // 受信バッファ
-
+    char buf[N]; // 受信バッファ
+    int i;
     // IPv4 UDP のソケットを作成
     if((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
         perror("socket");
@@ -35,21 +43,30 @@ int main(int argc, char** argv)
     // 受信バッファの初期化
     memset(buf, 0, sizeof(buf));
 
-    // 受信 パケットが到着するまでブロック
-    // from_addr には、送信元アドレスが格納される
-    if(recvfrom(sd, buf, sizeof(buf), 0,
-                (struct sockaddr *)&from_addr, &sin_size) < 0) {
-        perror("recvfrom");
+    int fd;
+    if((fd = open("/dev/dsp",O_WRONLY|O_CREAT|O_TRUNC,0644)) < 0){
+        perror("open");
         return -1;
     }
-    
-    printf("%s\n",buf);
-    printf("%s %d\n",inet_ntoa(from_addr.sin_addr),ntohs(from_addr.sin_port));
-    
-    if(sendto(sd, "I am send process", 17, 0,
-              (struct sockaddr *)&from_addr, sizeof(from_addr)) < 0) {
-        perror("sendto");
-        return -1;
+
+    while(1){
+        
+        // 受信 パケットが到着するまでブロック
+        // from_addr には、送信元アドレスが格納される
+        if((i = recvfrom(sd, buf, sizeof(buf), 0,
+                         (struct sockaddr *)&from_addr, &sin_size)) < 0) {
+            perror("recvfrom");
+            return -1;
+        }
+        if(write(fd,buf,N) < 0){
+            perror("write");
+            return -1;
+        }
+        /* if(sendto(sd, "I am send process", 17, 0, */
+        /*           (struct sockaddr *)&from_addr, sizeof(from_addr)) < 0) { */
+        /*     perror("sendto"); */
+        /*     return -1; */
+        /* } */
     }
 
     // ソケットのクローズ
