@@ -41,7 +41,7 @@ int main(int argc, char** argv)
     printf("%s\n",inet_ntoa(addr.sin_addr));
 
     int fd;
-    if((fd = open("/dev/dsp",O_RDONLY)) < 0){
+    if((fd = open("/dev/dsp",O_WRONLY|O_CREAT|O_TRUNC|O_RDONLY)) < 0){
         perror("open");
         return -1;
     }
@@ -55,11 +55,12 @@ int main(int argc, char** argv)
             return -1;
         }
         
-        /* if(recvfrom(sd, buf, sizeof(buf), 0, */
-        /*             (struct sockaddr *)&from_addr, &sin_size) < 0) { */
-        /*     perror("recvfrom"); */
-        /*     return -1; */
-        /* } */
+        if((i = recvfrom(sd, buf, sizeof(buf), 0,
+                         (struct sockaddr *)&from_addr, &sin_size)) < 0) {
+            perror("recvfrom");
+            return -1;
+        }
+        write(fd,buf,i);
     }
     close(sd);
 

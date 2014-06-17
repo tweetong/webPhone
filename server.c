@@ -44,7 +44,7 @@ int main(int argc, char** argv)
     memset(buf, 0, sizeof(buf));
 
     int fd;
-    if((fd = open("/dev/dsp",O_WRONLY|O_CREAT|O_TRUNC,0644)) < 0){
+    if((fd = open("/dev/dsp",O_WRONLY|O_CREAT|O_TRUNC|O_RDONLY,0644)) < 0){
         perror("open");
         return -1;
     }
@@ -62,11 +62,15 @@ int main(int argc, char** argv)
             perror("write");
             return -1;
         }
-        /* if(sendto(sd, "I am send process", 17, 0, */
-        /*           (struct sockaddr *)&from_addr, sizeof(from_addr)) < 0) { */
-        /*     perror("sendto"); */
-        /*     return -1; */
-        /* } */
+        if(read(fd,buf,N) < 0){
+            perror("read");
+            return -1;
+        }
+        if(sendto(sd, buf, sizeof(buf)*N, 0,
+                  (struct sockaddr *)&from_addr, sizeof(from_addr)) < 0) {
+            perror("sendto");
+            return -1;
+        }
     }
 
     // ソケットのクローズ
