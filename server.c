@@ -16,6 +16,7 @@
 
 #include "util/die.h"
 #include "util/params.h"
+#include "util/init.h"
 
 int main(int argc, char** argv)
 {
@@ -55,7 +56,8 @@ int main(int argc, char** argv)
     
     int fd;
     if((fd = open("/dev/dsp",O_RDWR,0644)) < 0) die("open");
-
+    init(fd);
+    
     while(1){
         
         // 受信 パケットが到着するまでブロック

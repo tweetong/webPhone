@@ -16,6 +16,7 @@
 
 #include "util/die.h"
 #include "util/params.h"
+#include "util/init.h"
 
 int main(int argc, char** argv)
 {
@@ -23,7 +24,7 @@ int main(int argc, char** argv)
         printf("argument\n");
         exit(1);
     }
-    
+
     int sd;
     struct sockaddr_in addr;
     struct sockaddr_in from_addr;
@@ -51,7 +52,8 @@ int main(int argc, char** argv)
 
     int fd;
     if((fd = open("/dev/dsp",O_RDWR)) < 0) die("open");
-
+    init(fd);
+    
     while(1){
         if((read(fd,buf,sizeof(char)*N)) < 0) die("read");
         // パケットをUDPで送信
