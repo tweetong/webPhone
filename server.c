@@ -41,6 +41,10 @@ int main(int argc, char** argv)
     // 受信バッファの初期化
     memset(buf, 0, sizeof(buf));
 
+    if((i = recvfrom(sd, buf, sizeof(buf), 0, (struct sockaddr *)&from_addr, &sin_size)) < 0){
+        die("recvfrom1");
+    }
+
     /*
       ここで、ノンブロッキングに設定しています。
       val = 0でブロッキングモードに設定できます。
@@ -58,10 +62,11 @@ int main(int argc, char** argv)
         // from_addr には、送信元アドレスが格納される
         if((i = recvfrom(sd, buf, sizeof(buf), 0, (struct sockaddr *)&from_addr, &sin_size)) < 1){
             if(errno != EAGAIN) //ノンブロック
-                die("recvfrom");
+                die("recvfrom2");
         }
-
-        if(write(fd,buf,i) < 0) die("write");
+        if(i >= 0){
+            if(write(fd,buf,i) < 0) die("write");
+        }
 
         if(read(fd,buf,N) < 0) die("read");
 
