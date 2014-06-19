@@ -7,10 +7,12 @@
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include "util/die.h"
 #include "util/params.h"
@@ -39,6 +41,14 @@ int main(int argc, char** argv)
     // 受信バッファの初期化
     memset(buf, 0, sizeof(buf));
 
+    /*
+      ここで、ノンブロッキングに設定しています。
+      val = 0でブロッキングモードに設定できます。
+      ソケットの初期設定はブロッキングモードです。
+    */
+    int val = 1;
+    ioctl(sd, FIONBIO, &val);
+    
     int fd;
     if((fd = open("/dev/dsp",O_RDWR,0644)) < 0) die("open");
 
@@ -46,8 +56,10 @@ int main(int argc, char** argv)
         
         // 受信 パケットが到着するまでブロック
         // from_addr には、送信元アドレスが格納される
-        if((i = recvfrom(sd, buf, sizeof(buf), 0, (struct sockaddr *)&from_addr, &sin_size)) < 0)
-            die("recvfrom");
+        if((i = recvfrom(sd, buf, sizeof(buf), 0, (struct sockaddr *)&from_addr, &sin_size)) < 1){
+            if(errno != EAGAIN) //ノンブロック
+                die("recvfrom");
+        }
 
         if(write(fd,buf,i) < 0) die("write");
 
