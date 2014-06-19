@@ -39,7 +39,6 @@ int main(int argc, char** argv)
 
         if(read(fd,buf,N) < 0) die("read");
 
-//        printf("%s\n",inet_ntoa(from_addr.sin_addr));
         my_server_send(buf,sizeof(char)*N);
     }
 

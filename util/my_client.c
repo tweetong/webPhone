@@ -29,7 +29,7 @@ void init_my_client(char *argv){
 // 受信プログラムと異なるあて先を設定しても UDP の場合はエラーにはならない
     addr.sin_family = AF_INET;
     addr.sin_port = htons(50000);
-    addr.sin_addr.s_addr = inet_addr(argv[1]);
+    addr.sin_addr.s_addr = inet_addr(argv);
 
 //printf("%s\n",inet_ntoa(addr.sin_addr));
 
