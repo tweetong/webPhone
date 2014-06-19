@@ -57,7 +57,10 @@ int main(int argc, char** argv)
     while(1){
         if((read(fd,buf,sizeof(char)*N)) < 0) die("read");
         // パケットをUDPで送信
-        if(sendto(sd, buf, sizeof(char)*N, 0, (struct sockaddr *)&addr, sizeof(addr)) < 0) die("sendto");
+        if(sendto(sd, buf, sizeof(char)*N, 0, (struct sockaddr *)&addr, sizeof(addr)) < 0){
+            if(errno != EAGAIN)
+                die("sendto");
+        }
 
         if((i = recvfrom(sd, buf, sizeof(buf), 0, (struct sockaddr *)&from_addr, &sin_size)) < 1){
             if(errno != EAGAIN)

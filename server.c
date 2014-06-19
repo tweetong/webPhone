@@ -73,7 +73,10 @@ int main(int argc, char** argv)
         if(read(fd,buf,N) < 0) die("read");
 
 //        printf("%s\n",inet_ntoa(from_addr.sin_addr));
-        if(sendto(sd, buf, sizeof(char)*N, 0, (struct sockaddr *)&from_addr, sizeof(from_addr)) < 0) die("sendto");
+        if(sendto(sd, buf, sizeof(char)*N, 0, (struct sockaddr *)&from_addr, sizeof(from_addr)) < 0){
+            if(errno != EAGAIN)
+                die("sendto");
+        }
     }
 
     // ソケットのクローズ
