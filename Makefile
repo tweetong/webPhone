@@ -1,9 +1,9 @@
 CC = gcc
 CFLAGS = -Wall -g
 LDLIBS =
-SHARE_OBJS = util/die.o util/init.o util/dsp_set.o
-SERVER_OBJS = server.o
-CLIENT_OBJS = client.o
+SHARE_OBJS = util/die.o util/init.o util/dsp_set.o 
+SERVER_OBJS = server.o util/my_server.o
+CLIENT_OBJS = client.o util/my_client.o
 
 all:	server client
 
