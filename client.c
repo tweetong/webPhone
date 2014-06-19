@@ -61,8 +61,9 @@ int main(int argc, char** argv)
             if(errno != EAGAIN)
                 die("recvfrom");
         }
-
-        if((write(fd,buf,i)) < 0) die("write");
+        if(i >= 0){
+            if((write(fd,buf,i)) < 0) die("write");
+        }
     }
     
     close(sd);
