@@ -83,7 +83,8 @@ void fft(double ar[], double ai[], int n, int iter, int flag)
 int main( int argc, char *argv[] )
 {
   int  i, nskip, framelen,flag,iter;
-  double spec[100000];
+  double spec;
+  double freq[100000];
   short  *sdata;
   double *xr, *xi, *ar, *ai;
   FILE *fpDAT;
@@ -118,16 +119,27 @@ int main( int argc, char *argv[] )
   flag = 0;
   iter = 0;
 
-  fft( ar,ai,framelen,iter,flag);
+  fft( ar,ai,framelen,iter,flag);//フーリエ
   
   FILE *fd = fopen("result.dat","w");
   if(fd == NULL){perror("fopen");exit(1);}
   
-  for( i = 0 ; i < framelen/2 ; i++ ) {
-    spec[i] = log10( (1.0/framelen)*( ar[i]*ar[i]+ai[i]*ai[i] ) );
-    fprintf(fd,"%d %lf\n", i, spec[i] );
+  for( i = 0 ; i < framelen ; i++ ) {
+    freq[i] = ((double)i)/((double)framelen)*8000;
+    if(freq[i] >= 3400){
+      ar[i] = 0.0;
+      ai[i] = 0.0;
+    }
   }
 
+  flag = 1;
+  iter = 0;
+
+  fft( ar,ai,framelen,iter,flag);//逆フーリエ
+
+  for(i = 0; i < framelen ; i++){
+    fprintf(fd,"%d %lf %lf\n", i, ar[i],ai[i] );  
+  }
   fclose(fd);
 
   return( 0 );
