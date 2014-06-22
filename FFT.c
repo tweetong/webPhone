@@ -1,7 +1,23 @@
+#include <math.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <fcntl.h>
+#include <errno.h>
+
+#include "util/die.h"
+#include "util/params.h"
+#include "util/init.h"
 
 void fft(double ar[], double ai[], int n, int iter, int flag)
 {
@@ -83,7 +99,6 @@ void fft(double ar[], double ai[], int n, int iter, int flag)
 int main( int argc, char *argv[] )
 {
   int  i, nskip, framelen,flag,iter;
-  double spec;
   double freq[100000];
   short  *sdata;
   double *xr, *xi, *ar, *ai;
@@ -119,28 +134,34 @@ int main( int argc, char *argv[] )
   flag = 0;
   iter = 0;
 
-  fft( ar,ai,framelen,iter,flag);//フーリエ
-  
-  FILE *fd = fopen("result.dat","w");
+  fft( ar,ai,framelen,iter,flag);//フーリエ 
+
+  int fd;
+  fd = open("/dev/dsp",O_RDWR,0644);
+  /*
+  FILE *fd = fopen("/dev/dsp","w");
   if(fd == NULL){perror("fopen");exit(1);}
-  
-  for( i = 0 ; i < framelen ; i++ ) {
+  */
+ /* for( i = 0 ; i < framelen ; i++ ) {
     freq[i] = ((double)i)/((double)framelen)*8000;
     if(freq[i] >= 3400){
       ar[i] = 0.0;
       ai[i] = 0.0;
     }
-  }
+    }*/
 
   flag = 1;
   iter = 0;
 
   fft( ar,ai,framelen,iter,flag);//逆フーリエ
 
-  for(i = 0; i < framelen ; i++){
-    fprintf(fd,"%d %lf %lf\n", i, ar[i],ai[i] );  
+  for( i = 0 ; i < framelen ; i++ ) {
+    sdata[i] = (short)(ar[i]);
   }
-  fclose(fd);
+
+  write(fd,sdata,framelen);
+
+  close(fd);
 
   return( 0 );
 }
