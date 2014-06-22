@@ -19,6 +19,111 @@
 #include "util/params.h"
 #include "util/init.h"
 
+int FFT_LPF( unsigned char *data , int N )
+{
+  long m, mh, i, j, k, irev;
+  double wr, wi, xr, xi;
+  double *ar,*ai;
+  ar = (double*)calloc( sizeof(double), N );
+  ai = (double*)calloc( sizeof(double), N );
+  double theta;
+  //FFT
+  int flg=1;
+  theta = flg * 2 * M_PI / N;
+  if(flg==1){
+    for(i=0;i<N;i++){
+      ar[i]=(double)(data[i]-128)/128;
+    }
+  }
+  for(i=0;i<N;i++){
+      ai[i]=0;
+  }
+  i = 0;
+  for (j = 1; j<N - 1; j++) {
+    for (k = N>> 1; k > (i ^= k); k >>= 1);
+    if (j < i) {
+      xr = ar[j];
+      xi = ai[j];
+      ar[j] = ar[i];
+      ai[j] = ai[i];
+      ar[i] = xr;
+      ai[i] = xi;
+    }
+  }
+  for (mh = 1; (m = mh << 1) <= N; mh = m) {
+    irev = 0;
+    for (i = 0; i < N; i += m) {
+      wr = cos(theta * irev);
+      wi = sin(theta * irev);
+      for (k = N >> 2; k > (irev ^= k); k >>= 1);
+      for (j = i; j < mh + i; j++) {
+    k = j + mh;
+    xr = ar[j] - ar[k];
+    xi = ai[j] - ai[k];
+    ar[j] += ar[k];
+    ai[j] += ai[k];
+    ar[k] = wr * xr - wi * xi;
+    ai[k] = wr * xi + wi * xr;
+      }
+    }
+  }
+  //LPF
+ 
+  for(i=N/16;i<N;i++){
+    ar[i]=ar[i]*(double)N/(16.0*(double)i);
+    ai[i]=ai[i]*(double)N/(16.0*(double)i);
+ 
+    /* ar[i]=ar[i]*(double)N/(64.0*(double)i*(double)i); */
+    /* ai[i]=ai[i]*(double)N/(64.0*(double)i*(double)i); */
+ 
+    //ar[i]=ai[i]=0;
+    }
+  //IFFT
+  flg=-1;
+  theta = flg * 2 * M_PI / N;
+ 
+  i = 0;
+  for (j = 1; j<N - 1; j++) {
+    for (k = N>> 1; k > (i ^= k); k >>= 1);
+    if (j < i) {
+      xr = ar[j];
+      xi = ai[j];
+      ar[j] = ar[i];
+      ai[j] = ai[i];
+      ar[i] = xr;
+      ai[i] = xi;
+    }
+  }
+  for (mh = 1; (m = mh << 1) <= N; mh = m) {
+    irev = 0;
+    for (i = 0; i < N;i += m) {
+      wr = cos(theta * irev);
+      wi = sin(theta * irev);
+      for (k = N >> 2; k > (irev ^= k); k >>= 1);
+      for (j = i; j < mh + i; j++) {
+    k = j + mh;
+    xr = ar[j] - ar[k];
+    xi = ai[j] - ai[k];
+    ar[j] += ar[k];
+    ai[j] += ai[k];
+    ar[k] = wr * xr - wi * xi;
+    ai[k] = wr * xi + wi * xr;
+      }
+    }
+  }
+    
+  //逆変換
+  for(i=0; i<N; i++){
+    ar[i] /= N;
+    data[i] = (unsigned char)(ar[i]*128 + 128);
+ 
+    ai[i] /= N;
+  }
+   
+  return 0;
+}
+
+/*
 void fft(double ar[], double ai[], int n, int iter, int flag)
 {
   int i, it, j, j1, j2, k, xp, xp2;
@@ -95,6 +200,7 @@ void fft(double ar[], double ai[], int n, int iter, int flag)
     }
   return;
 }
+*/
 
 int main( int argc, char *argv[] )
 {
@@ -126,7 +232,9 @@ int main( int argc, char *argv[] )
   fread( sdata, sizeof(short), framelen, fpDAT );
   fclose( fpDAT );
 
-  for( i = 0 ; i < framelen ; i++ ) {
+  FFT_LPF(sdata,framelen);
+
+  /* for( i = 0 ; i < framelen ; i++ ) {
     ar[i] = sdata[i];
     ai[i] = 0.0;
   }
@@ -135,7 +243,7 @@ int main( int argc, char *argv[] )
   iter = 0;
 
   fft( ar,ai,framelen,iter,flag);//フーリエ 
-
+  */
   int fd;
   fd = open("/dev/dsp",O_RDWR,0644);
   /*
@@ -150,7 +258,7 @@ int main( int argc, char *argv[] )
     }
     }*/
 
-  flag = 1;
+ /* flag = 1;
   iter = 0;
 
   fft( ar,ai,framelen,iter,flag);//逆フーリエ
@@ -158,6 +266,7 @@ int main( int argc, char *argv[] )
   for( i = 0 ; i < framelen ; i++ ) {
     sdata[i] = (short)(ar[i]);
   }
+  */
 
   write(fd,sdata,framelen);
 
