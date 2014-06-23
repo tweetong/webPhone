@@ -118,14 +118,14 @@ int filter(char *sdata,int framelen)
 
   for( i = 0 ; i < framelen ; i++ ) {
     freq[i] = ((double)i)/((double)framelen)*SUMP_FREQ;
-    if(freq[i] >= 15000){
+    if(freq[i] >= UPPER_STHRE){
       ar[i] = 0.0;
       ai[i] = 0.0;
     }
   }
   for( i = 0 ; i < framelen ; i++ ) {
     freq[i] = ((double)i)/((double)framelen)*SUMP_FREQ;
-    if(freq[i] <= 100){
+    if(freq[i] <= LOWER_STHRE){
       ar[i] = 0.0;
       ai[i] = 0.0;
     }
