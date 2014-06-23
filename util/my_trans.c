@@ -29,16 +29,16 @@ void *mysend(void *arg){
         if((read(my_thread_arg->fd,buf,sizeof(char)*N)) < 0) die("read");
         pthread_mutex_unlock(my_thread_arg->fd_mutex);
         int i;
-	for(i = 0; i<512 ; i++){
-	  filter(buf,(int)((float)N/512.0));
-	}  
+	filter(buf,N);
         // パケットをUDPで送信
-        pthread_mutex_lock(my_thread_arg->sd_mutex);
-        if(sendto(my_thread_arg->sd, buf, sizeof(char)*N, 0, (struct sockaddr *)(my_thread_arg->addr), sizeof(struct sockaddr_in)) < 0){
+	pthread_mutex_lock(my_thread_arg->sd_mutex);
+	for(i = 0; i<512 ; i++){
+	  if(sendto(my_thread_arg->sd, buf, sizeof(char)*((int)((float)N/512.0)), 0, (struct sockaddr *)(my_thread_arg->addr), sizeof(struct sockaddr_in)) < 0){
             if(errno != EAGAIN)
-                die("sendto");
-        }
-        pthread_mutex_unlock(my_thread_arg->sd_mutex);
+	      die("sendto");
+	  }
+	}
+	pthread_mutex_unlock(my_thread_arg->sd_mutex);
     }
     return NULL;
 }
