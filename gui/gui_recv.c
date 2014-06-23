@@ -10,15 +10,9 @@ static GLint point[MAXPOINTS][2];
 
 static void display(void)
 {
-    int i;
-    glClear(GL_COLOR_BUFFER_BIT);
     /* 記録したデータで線を描く */
     if (pointnum > 1) {
-        glBegin(GL_LINES);
-        for (i = 0; i < pointnum; ++i) {
-            drawCircle(point[i][0],point[i][1]);
-        }
-        glEnd();
+        drawCircle(point[pointnum-1][0],point[pointnum-1][1]);
     }
     glFlush();
 }

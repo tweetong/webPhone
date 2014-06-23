@@ -33,4 +33,5 @@ void resize(int w, int h)
 void init_gui(void)
 {
     glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
 }
