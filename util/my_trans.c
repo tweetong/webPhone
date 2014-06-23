@@ -18,15 +18,17 @@
 #include "die.h"
 #include "my_trans.h"
 #include "params.h"
+#include "fft.h"
 
 void *mysend(void *arg){
     MY_THREAD_ARG *my_thread_arg =(MY_THREAD_ARG*)arg;
-    char buf[N];
+    char *buf;
+    buf = (char*)calloc( sizeof(char), N);
     while(1){
         pthread_mutex_lock(my_thread_arg->fd_mutex);
         if((read(my_thread_arg->fd,buf,sizeof(char)*N)) < 0) die("read");
         pthread_mutex_unlock(my_thread_arg->fd_mutex);
-        //ここでbufを変換する。
+        filter(buf,N);
             
         // パケットをUDPで送信
         pthread_mutex_lock(my_thread_arg->sd_mutex);
