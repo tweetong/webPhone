@@ -117,14 +117,14 @@ int filter(char *sdata,int framelen)
   fft( ar,ai,framelen,iter,flag);//フーリエ
 
   for( i = 0 ; i < framelen ; i++ ) {
-    freq[i] = ((double)i)/((double)framelen)*8000;
+    freq[i] = ((double)i)/((double)framelen)*SUMP_FREQ;
     if(freq[i] >= 15000){
       ar[i] = 0.0;
       ai[i] = 0.0;
     }
   }
   for( i = 0 ; i < framelen ; i++ ) {
-    freq[i] = ((double)i)/((double)framelen)*8000;
+    freq[i] = ((double)i)/((double)framelen)*SUMP_FREQ;
     if(freq[i] <= 100){
       ar[i] = 0.0;
       ai[i] = 0.0;
