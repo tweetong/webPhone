@@ -33,7 +33,7 @@ void *mysend(void *arg){
         // パケットをUDPで送信
 	pthread_mutex_lock(my_thread_arg->sd_mutex);
 	for(i = 0; i<512 ; i++){
-	  if(sendto(my_thread_arg->sd, buf, sizeof(char)*((int)((float)N/512.0)), 0, (struct sockaddr *)(my_thread_arg->addr), sizeof(struct sockaddr_in)) < 0){
+            if(sendto(my_thread_arg->sd, buf + 512*i, sizeof(char)*((int)((float)N/512.0)), 0, (struct sockaddr *)(my_thread_arg->addr), sizeof(struct sockaddr_in)) < 0){
             if(errno != EAGAIN)
 	      die("sendto");
 	  }
