@@ -26,27 +26,26 @@ void *mysend(void *arg){
     char *buf;
     buf = (char*)calloc( sizeof(char), N);
     int dep = 0;//たまった個数
+    //buf初期化
+    pthread_mutex_lock(my_thread_arg->fd_mutex);
+    if((read(my_thread_arg->fd,buf + dep,sizeof(char)*ONCE_SEND)) < 0) die("read");
+    pthread_mutex_unlock(my_thread_arg->fd_mutex);
+    
     while(1){
+        memmove(buf,buf + ONCE_SEND,N - ONCE_SEND);
         pthread_mutex_lock(my_thread_arg->fd_mutex);
-        if((read(my_thread_arg->fd,buf + dep,sizeof(char)*ONCE_SEND)) < 0) die("read");
+        if((read(my_thread_arg->fd,buf + N - ONCE_SEND,sizeof(char)*ONCE_SEND)) < 0) die("read");
         pthread_mutex_unlock(my_thread_arg->fd_mutex);
-	dep += ONCE_SEND;
-	if(dep >= N){
-	  filter(buf,N);
-	}
+
+//	  filter(buf,N);
 	
         // パケットをUDPで送信
 	pthread_mutex_lock(my_thread_arg->sd_mutex);
-            if(sendto(my_thread_arg->sd, buf, sizeof(char)*ONCE_SEND, 0, (struct sockaddr *)(my_thread_arg->addr), sizeof(struct sockaddr_in)) < 0){
+        if(sendto(my_thread_arg->sd, buf, sizeof(char)*ONCE_SEND, 0, (struct sockaddr *)(my_thread_arg->addr), sizeof(struct sockaddr_in)) < 0){
             if(errno != EAGAIN)
-	      die("sendto");
-	    }
-
+                die("sendto");
+        }
 	pthread_mutex_unlock(my_thread_arg->sd_mutex);
-	if(dep >= N){
-	  memmove(buf,buf + ONCE_SEND,N - ONCE_SEND);
-	  dep -= ONCE_SEND;
-	}
     }
     return NULL;
 }
