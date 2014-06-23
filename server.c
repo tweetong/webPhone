@@ -14,9 +14,12 @@
 #include <stdlib.h>
 #include <errno.h>
 
+#include <pthread.h>
+
 #include "util/die.h"
 #include "util/params.h"
 #include "util/init.h"
+#include "util/my_trans.h"
 
 int main(int argc, char** argv)
 {
@@ -26,8 +29,6 @@ int main(int argc, char** argv)
     socklen_t sin_size = sizeof(struct sockaddr_in);
     struct sockaddr_in from_addr;
 
-    char buf[N]; // 受信バッファ
-    int i;
     // IPv4 UDP のソケットを作成
     if((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) die("socket");
 
@@ -39,10 +40,9 @@ int main(int argc, char** argv)
     // バインドする
     if(bind(sd, (struct sockaddr *)&addr, sizeof(addr)) < 0) die("bind");
 
-    // 受信バッファの初期化
-    memset(buf, 0, sizeof(buf));
-
-    if((i = recvfrom(sd, buf, sizeof(buf), 0, (struct sockaddr *)&from_addr, &sin_size)) < 0){
+    char buf[N];
+    // clientが来るまで待つ
+    if((recvfrom(sd, buf, sizeof(buf), 0, (struct sockaddr *)&from_addr, &sin_size)) < 0){
         die("recvfrom1");
     }
 
@@ -58,26 +58,32 @@ int main(int argc, char** argv)
     if((fd = open("/dev/dsp",O_RDWR,0644)) < 0) die("open");
     init(fd);
     
-    while(1){
-        
-        // 受信 パケットが到着するまでブロック
-        // from_addr には、送信元アドレスが格納される
-        if((i = recvfrom(sd, buf, sizeof(buf), 0, (struct sockaddr *)&from_addr, &sin_size)) < 1){
-            if(errno != EAGAIN) //ノンブロック
-                die("recvfrom2");
-        }
-        if(i >= 0){
-            if(write(fd,buf,i) < 0) die("write");
-        }
-
-        if(read(fd,buf,N) < 0) die("read");
-
-//        printf("%s\n",inet_ntoa(from_addr.sin_addr));
-        if(sendto(sd, buf, sizeof(char)*N, 0, (struct sockaddr *)&from_addr, sizeof(from_addr)) < 0){
-            if(errno != EAGAIN)
-                die("sendto");
-        }
-    }
+    pthread_mutex_t fd_mutex;
+    pthread_mutex_init(&fd_mutex,NULL);
+    pthread_mutex_t sd_mutex;
+    pthread_mutex_init(&sd_mutex,NULL);
+    pthread_t send_th;
+    pthread_t recv_th;
+    
+    MY_THREAD_ARG send_th_arg;
+    send_th_arg.sd = sd;
+    send_th_arg.fd = fd;
+    send_th_arg.sin_size = sin_size;
+    send_th_arg.fd_mutex = &fd_mutex;
+    send_th_arg.sd_mutex = &sd_mutex;
+    send_th_arg.addr = &from_addr;
+    MY_THREAD_ARG recv_th_arg;
+    recv_th_arg.sd = sd;
+    recv_th_arg.fd = fd;
+    recv_th_arg.sin_size = sin_size;
+    recv_th_arg.fd_mutex = &fd_mutex;
+    recv_th_arg.sd_mutex = &fd_mutex;
+    
+    pthread_create(&send_th,NULL,mysend,&send_th_arg);
+    pthread_create(&recv_th,NULL,myrecv,&recv_th_arg);
+    
+    pthread_join(send_th,NULL);
+    pthread_join(recv_th,NULL);
 
     // ソケットのクローズ
     close(sd);
