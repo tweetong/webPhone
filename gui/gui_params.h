@@ -2,7 +2,7 @@
 #define __INCLUDE_GUI_PARAMS_H__
 
 #define R 5
-#define MAXPOINTS 1000
+#define MAXPOINTS 1000000
 #define WINDOW_SIZE_X 500
 #define WINDOW_SIZE_Y 500
 #define WINDOW_POS_SEND_X 100

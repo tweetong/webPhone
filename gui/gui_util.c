@@ -45,6 +45,11 @@ void keyboard(unsigned char key, int x, int y)
   case '\033':
       gui_send(INF,0);
       exit(0);
+      break;
+  case 'c':
+      glClear(GL_COLOR_BUFFER_BIT);
+      gui_send(0,INF);
+      break;
   default:
     break;
   }

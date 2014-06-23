@@ -21,9 +21,13 @@ static void Idle(){
     GLint *p;
     if((p = gui_recv()) == NULL) return;
     if(p[0] == INF) exit(0);
+    if(p[1] == INF){
+        glClear(GL_COLOR_BUFFER_BIT);
+        pointnum = 0;
+    }
     point[pointnum][0] = p[0];
     point[pointnum][1] = p[1];
-    pointnum++;
+    if(pointnum < MAXPOINTS)pointnum++;
     glutPostRedisplay();
 }
 
