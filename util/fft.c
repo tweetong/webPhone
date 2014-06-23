@@ -140,7 +140,7 @@ int filter(char *sdata,int framelen)
   for(j = 0;j < framelen - 10;j += 10){
     double ave = 0;
     for(i = 0;i < 120;i++) ave += abs(ar[i + j]);
-    if(ave/120 <= 10){
+    if(ave/120 <= 5){
       for(i = 0;i < 10;i++)ar[i + j] = 0;
     }
   }

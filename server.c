@@ -20,25 +20,50 @@
 #include "util/params.h"
 #include "util/init.h"
 #include "util/my_trans.h"
+#include "gui/gui_recv.h"
+#include "gui/gui_send.h"
 
 int main(int argc, char** argv)
 {
+    int tcp_sd = socket(PF_INET,SOCK_STREAM,0);
+    if(tcp_sd < 0) die("tcp_socket");
+    struct sockaddr_in tcp_addr;
+    tcp_addr.sin_family = AF_INET;
+    tcp_addr.sin_addr.s_addr = INADDR_ANY;
+    tcp_addr.sin_port = htons(50001);
+    if(bind(tcp_sd,(struct sockaddr*)&tcp_addr,sizeof(tcp_addr)) < 0) die("tcp_bind");
+    listen(tcp_sd,10);
+    struct sockaddr_in client_addr;
+    socklen_t len = sizeof(struct sockaddr_in);
+    int ss = accept(tcp_sd,(struct sockaddr*)&client_addr,&len);
+
+    void *_gui_send(void* arg){
+        gui_tcp_send(argc,argv,ss);
+        return NULL;
+    }
+    pthread_t gui_s_send_th;
+    pthread_create(&gui_s_send_th,NULL,_gui_send,NULL);
+
+    void *_gui_recv(void* arg){
+        gui_tcp_recv(argc,argv,ss);
+        return NULL;
+    }
+    pthread_t gui_s_recv_th;
+    pthread_create(&gui_s_recv_th,NULL,_gui_recv,NULL);
+
+    
     int sd;
     struct sockaddr_in addr;
-
     socklen_t sin_size = sizeof(struct sockaddr_in);
     struct sockaddr_in from_addr;
-
     // IPv4 UDP のソケットを作成
     if((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) die("socket");
-
     // 待ち受けるIPとポート番号を設定
     addr.sin_family = AF_INET;
     addr.sin_port = htons(50000);
     addr.sin_addr.s_addr = INADDR_ANY; // すべてのアドレス宛のパケットを受信する
-
     // バインドする
-    if(bind(sd, (struct sockaddr *)&addr, sizeof(addr)) < 0) die("bind");
+    if(bind(sd, (struct sockaddr *)&addr, sizeof(addr)) < 0) die("tcp_bind");
 
     char buf[N];
     // clientが来るまで待つ
@@ -84,10 +109,13 @@ int main(int argc, char** argv)
     
     pthread_join(send_th,NULL);
     pthread_join(recv_th,NULL);
+    pthread_join(gui_s_recv_th,NULL);
+    pthread_join(gui_s_send_th,NULL);
 
     // ソケットのクローズ
     close(sd);
     close(fd);
-
+    close(tcp_sd);
+    
     return 0;
 }

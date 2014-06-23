@@ -20,6 +20,8 @@
 #include "util/params.h"
 #include "util/init.h"
 #include "util/my_trans.h"
+#include "gui/gui_send.h"
+#include "gui/gui_recv.h"
 
 int main(int argc, char** argv)
 {
@@ -28,20 +30,41 @@ int main(int argc, char** argv)
         exit(1);
     }
 
+    int tcp_sd = socket(PF_INET,SOCK_STREAM,0);
+    struct sockaddr_in tcp_addr;
+    tcp_addr.sin_family = AF_INET;
+    tcp_addr.sin_addr.s_addr = inet_addr(argv[1]);
+    tcp_addr.sin_port = htons(50001);
+    if(connect(tcp_sd,(struct sockaddr*)&tcp_addr,sizeof(struct sockaddr_in)) < 0 )
+        die("connect");
+    argc = 1;
+
+    void *_gui_send(void* arg){
+        gui_tcp_send(argc,argv,tcp_sd);
+        return NULL;
+    }
+    pthread_t gui_c_send_th;
+    pthread_create(&gui_c_send_th,NULL,_gui_send,NULL);
+
+    void *_gui_recv(void* arg){
+        gui_tcp_recv(argc,argv,tcp_sd);
+        return NULL;
+    }
+    pthread_t gui_c_recv_th;
+    pthread_create(&gui_c_recv_th,NULL,_gui_recv,NULL);
+    
+    
+    //for udp
     int sd;
     struct sockaddr_in addr;
     socklen_t sin_size = sizeof(struct sockaddr_in);
-
     if((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) die("socket");
-
     // 送信先アドレスとポート番号を設定する
     // 受信プログラムと異なるあて先を設定しても UDP の場合はエラーにはならない
     addr.sin_family = AF_INET;
     addr.sin_port = htons(50000);
     addr.sin_addr.s_addr = inet_addr(argv[1]);
-
     //printf("%s\n",inet_ntoa(addr.sin_addr));
-
     /*
       ここで、ノンブロッキングに設定しています。
       val = 0でブロッキングモードに設定できます。
@@ -80,9 +103,12 @@ int main(int argc, char** argv)
     
     pthread_join(send_th,NULL);
     pthread_join(recv_th,NULL);
+    pthread_join(gui_c_send_th,NULL);
+    pthread_join(gui_c_recv_th,NULL);
     
     close(sd);
     close(fd);
+    close(tcp_sd);
 
     return 0;
 }
