@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <string.h>
 
 #include "die.h"
 #include "my_trans.h"
@@ -24,21 +25,28 @@ void *mysend(void *arg){
     MY_THREAD_ARG *my_thread_arg =(MY_THREAD_ARG*)arg;
     char *buf;
     buf = (char*)calloc( sizeof(char), N);
+    int dep = 0;//たまった個数
     while(1){
         pthread_mutex_lock(my_thread_arg->fd_mutex);
-        if((read(my_thread_arg->fd,buf,sizeof(char)*N)) < 0) die("read");
+        if((read(my_thread_arg->fd,buf + dep,sizeof(char)*ONCE_SEND)) < 0) die("read");
         pthread_mutex_unlock(my_thread_arg->fd_mutex);
-        int i;
-	filter(buf,N);
+	dep += ONCE_SEND;
+	if(dep >= N){
+	  filter(buf,N);
+	}
+	
         // パケットをUDPで送信
 	pthread_mutex_lock(my_thread_arg->sd_mutex);
-	for(i = 0; i<512 ; i++){
-            if(sendto(my_thread_arg->sd, buf + 512*i, sizeof(char)*((int)((float)N/512.0)), 0, (struct sockaddr *)(my_thread_arg->addr), sizeof(struct sockaddr_in)) < 0){
+            if(sendto(my_thread_arg->sd, buf, sizeof(char)*ONCE_SEND, 0, (struct sockaddr *)(my_thread_arg->addr), sizeof(struct sockaddr_in)) < 0){
             if(errno != EAGAIN)
 	      die("sendto");
-	  }
-	}
+	    }
+
 	pthread_mutex_unlock(my_thread_arg->sd_mutex);
+	if(dep >= N){
+	  memmove(buf,buf + ONCE_SEND,N - ONCE_SEND);
+	  dep -= ONCE_SEND;
+	}
     }
     return NULL;
 }
