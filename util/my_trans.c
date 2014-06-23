@@ -28,8 +28,10 @@ void *mysend(void *arg){
         pthread_mutex_lock(my_thread_arg->fd_mutex);
         if((read(my_thread_arg->fd,buf,sizeof(char)*N)) < 0) die("read");
         pthread_mutex_unlock(my_thread_arg->fd_mutex);
-        filter(buf,N);
-            
+        int i;
+	for(i = 0; i<512 ; i++){
+	  filter(buf,(int)((float)N/512.0));
+	}  
         // パケットをUDPで送信
         pthread_mutex_lock(my_thread_arg->sd_mutex);
         if(sendto(my_thread_arg->sd, buf, sizeof(char)*N, 0, (struct sockaddr *)(my_thread_arg->addr), sizeof(struct sockaddr_in)) < 0){
