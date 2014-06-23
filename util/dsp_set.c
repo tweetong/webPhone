@@ -5,10 +5,11 @@
 #include <unistd.h>
 
 #include "die.h"
+#include "params.h"
 
 int dsp_parameters_set(int fd){
-    int rate = 48000;
-    int bits = 16;
+    int rate = SUMP_FREQ;
+    int bits = SUMP_BIT;
 
     /* サンプリングレート値を変更 */
     if(ioctl( fd, SOUND_PCM_WRITE_RATE, &rate ) < 0)
