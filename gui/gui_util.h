@@ -4,5 +4,6 @@
 void resize(int w,int h);
 void init_gui(void);
 void drawCircle(int x,int y);
+void keyboard(unsigned char key,int x,int y);
 
 #endif

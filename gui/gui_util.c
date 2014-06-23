@@ -1,8 +1,9 @@
 #include <GL/glut.h>
 #include <math.h>
+#include <pthread.h>
 
 #include "gui_params.h"
-
+#include "gui_trans.h"
 
 void drawCircle(int x,int y)
 {
@@ -34,4 +35,17 @@ void init_gui(void)
 {
     glClearColor(1.0, 1.0, 1.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void keyboard(unsigned char key, int x, int y)
+{
+  switch (key) {
+  case 'q':
+  case 'Q':
+  case '\033':
+      gui_send(INF,0);
+      exit(0);
+  default:
+    break;
+  }
 }

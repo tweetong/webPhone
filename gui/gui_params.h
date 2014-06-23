@@ -3,5 +3,11 @@
 
 #define R 5
 #define MAXPOINTS 1000
-
+#define WINDOW_SIZE_X 500
+#define WINDOW_SIZE_Y 500
+#define WINDOW_POS_SEND_X 100
+#define WINDOW_POS_SEND_Y 100
+#define WINDOW_POS_RECV_X 700
+#define WINDOW_POS_RECV_Y 100
+#define INF 100000
 #endif

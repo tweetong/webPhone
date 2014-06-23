@@ -35,13 +35,14 @@ static void display(void)
 int gui_tcp_send(int argc, char *argv[], int sd)
 {
     init_gui_trans(sd);
-    glutInitWindowPosition(100, 100);
-    glutInitWindowSize(320, 240);
+    glutInitWindowPosition(WINDOW_POS_SEND_X, WINDOW_POS_SEND_Y);
+    glutInitWindowSize(WINDOW_SIZE_X, WINDOW_SIZE_Y);
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA);
     glutCreateWindow("send");
     glutDisplayFunc(display);
     glutReshapeFunc(resize);
+    glutKeyboardFunc(keyboard);
     glutMotionFunc(motion);
     init_gui();
     glutMainLoop();
