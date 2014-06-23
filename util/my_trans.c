@@ -24,21 +24,30 @@
 void *mysend(void *arg){
     MY_THREAD_ARG *my_thread_arg =(MY_THREAD_ARG*)arg;
     char *buf;
+    char *raw_buf;
+    int i;    
     buf = (char*)calloc( sizeof(char), N);
-    int dep = 0;//たまった個数
+    raw_buf = (char*)calloc( sizeof(char), N);
+    
     //buf初期化
     pthread_mutex_lock(my_thread_arg->fd_mutex);
-    if((read(my_thread_arg->fd,buf + dep,sizeof(char)*ONCE_SEND)) < 0) die("read");
+    if((read(my_thread_arg->fd,raw_buf,sizeof(char)*ONCE_SEND)) < 0) die("read");
     pthread_mutex_unlock(my_thread_arg->fd_mutex);
+    for(i = 0;i < N;i++) buf[i] = raw_buf[i];
     
     while(1){
+        memmove(raw_buf,raw_buf + ONCE_SEND,N - ONCE_SEND);
         memmove(buf,buf + ONCE_SEND,N - ONCE_SEND);
+        
         pthread_mutex_lock(my_thread_arg->fd_mutex);
-        if((read(my_thread_arg->fd,buf + N - ONCE_SEND,sizeof(char)*ONCE_SEND)) < 0) die("read");
+        if((read(my_thread_arg->fd,raw_buf + N - ONCE_SEND,sizeof(char)*ONCE_SEND)) < 0) die("read");
         pthread_mutex_unlock(my_thread_arg->fd_mutex);
+        for(i = N - ONCE_SEND;i < N;i++){
+            buf[i] = raw_buf[i];
+        }
 
-//	  filter(buf,N);
-	
+        filter(buf,N);
+        
         // パケットをUDPで送信
 	pthread_mutex_lock(my_thread_arg->sd_mutex);
         if(sendto(my_thread_arg->sd, buf, sizeof(char)*ONCE_SEND, 0, (struct sockaddr *)(my_thread_arg->addr), sizeof(struct sockaddr_in)) < 0){
