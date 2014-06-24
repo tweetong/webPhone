@@ -23,12 +23,16 @@
 #include "gui/gui_send.h"
 #include "gui/gui_recv.h"
 
+#include <X11/X.h>
+#include <X11/Xlib.h>
+
 int main(int argc, char** argv)
 {
     if(argc != 2){
         printf("argument\n");
         exit(1);
     }
+    XInitThreads();
 
     int tcp_sd = socket(PF_INET,SOCK_STREAM,0);
     struct sockaddr_in tcp_addr;
