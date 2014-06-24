@@ -1,17 +1,5 @@
-ついーとんとときねるのウェブフォーン仕様
+このプログラムは絵を書きながら会話ができるものである。
 
-*resource temporary unavalable
-*FFTの実装 by tokineruE
+make allではserver.out client.outが生成され、client.outにcommand line引数でserver側のIPアドレスを与えることで動く。
 
-makeの仕様
-make serverでサーバーのプログラムを構成
-make clientでクライアントのプログラムを構成
-!新たに作ったファイルについてはそれを使うseverかclientのOBJSに書き加える
-
-gitでよく使うもの
-git commit -am "comment" 変更をgitに繁栄する
-git pull 他の人の変更を持ってくる
-git branch new_branch ブランチを作る
-git checkout branch_name ブランチに移動する(現在いるブランチの作業をcommitした後でないといけない
-git merge branch_name 今いるブランチにbranch_nameをくっつける
-git pushリポジトリに自分の変更を上げて共有する
+make guiではお絵かき機能だけのgui_server.out gui_client.outが生成され、gui_server.outではcommand line引数に50001をgui_client.outではcommand line引数にserverのIPアドレスを入れる
