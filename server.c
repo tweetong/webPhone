@@ -22,9 +22,13 @@
 #include "util/my_trans.h"
 #include "gui/gui_recv.h"
 #include "gui/gui_send.h"
+#include <X11/X.h>
+#include <X11/Xlib.h>
 
 int main(int argc, char** argv)
 {
+        XInitThreads();
+
     int tcp_sd = socket(PF_INET,SOCK_STREAM,0);
     if(tcp_sd < 0) die("tcp_socket");
     struct sockaddr_in tcp_addr;
