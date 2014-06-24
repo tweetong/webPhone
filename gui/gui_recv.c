@@ -41,6 +41,7 @@ int gui_tcp_recv(int argc, char *argv[], int sd)
     glutCreateWindow("recv");
     glutDisplayFunc(display);
     glutReshapeFunc(resize);
+    glutKeyboardFunc(keyboard);
     glutIdleFunc(Idle);
     init_gui();
     glutMainLoop();

@@ -5,7 +5,7 @@
 #define N 4096//65536
 #define SUMP_FREQ 16000
 #define SUMP_BIT 16
-#define UPPER_STHRE 10000
+#define UPPER_STHRE 20000
 #define LOWER_STHRE 100
 
 #endif
