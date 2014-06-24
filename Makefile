@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -g
-LDLIBS = -lpthread -lm -lglut -lGLU -lGL -lm 
+LDLIBS = -lpthread -lm -lglut -lGLU -lGL -lm -lpng
 SHARE_OBJS = util/die.o util/init.o util/dsp_set.o util/my_trans.o util/fft.o gui/gui_trans.o gui/gui_util.o gui/gui_send.o gui/gui_recv.o
 SERVER_OBJS = server.o
 CLIENT_OBJS = client.o
